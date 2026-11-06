@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Feliz Aniversário 💖</title>
+<title>Feliz Aniversário</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -67,6 +67,8 @@
   }
   #motivo.mostrar{opacity:1;transform:translateX(-50%) translateY(0)}
   #motivo small{display:block;font-weight:500;opacity:.6;font-size:.72rem;margin-bottom:2px}
+  .etapa{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+    padding:5px 12px;border-radius:99px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);margin-bottom:8px}
   .instrucao{position:absolute;bottom:130px;left:0;right:0;z-index:2;font-size:.95rem;opacity:.85;transition:opacity .6s;pointer-events:none}
   .overlay{position:absolute;inset:0;z-index:5;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(43,15,46,.85);backdrop-filter:blur(4px);padding:24px}
   .overlay.ativa{display:flex;animation:surgir .5s}
@@ -84,6 +86,38 @@
   .opcao.certa{background:#d9f7e2;border-color:#4cc77a;color:#1e6b3c}
   .opcao.errada{background:#ffe0e0;border-color:#ff7b7b;opacity:.6}
   .quiz-feedback{min-height:48px;margin-top:16px;font-weight:600;font-size:.95rem}
+
+  /* selo do casal */
+  .casal{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:22px;font-family:'Dancing Script',cursive;line-height:1}
+  .casal .nome{
+    font-size:2.9rem;font-weight:700;padding:4px 6px;cursor:pointer;
+    background:linear-gradient(120deg,#ffd1dc 0%,#ff5c8a 35%,#ffcf6b 65%,#ffd1dc 100%);background-size:250% 100%;
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 0 12px rgba(255,92,138,.55));animation:brilho 4s linear infinite;transition:transform .2s
+  }
+  .casal .nome:active{transform:scale(.94)}
+  @keyframes brilho{to{background-position:-250% 0}}
+  .casal .mais{
+    width:38px;height:38px;border-radius:50%;display:grid;place-items:center;flex:none;
+    font:700 1.4rem 'Quicksand',sans-serif;color:#fff;background:linear-gradient(135deg,#ff5c8a,#ff8fab);
+    box-shadow:0 0 0 0 rgba(255,92,138,.7);animation:pulsar 1.6s infinite
+  }
+  @keyframes pulsar{0%{box-shadow:0 0 0 0 rgba(255,92,138,.6);transform:scale(1)}50%{transform:scale(1.12)}100%{box-shadow:0 0 0 16px rgba(255,92,138,0);transform:scale(1)}}
+  .casal .nome.pular{animation:brilho 4s linear infinite,pulo .5s}
+  @keyframes pulo{40%{transform:translateY(-10px) rotate(-4deg)}}
+  .casal .nome.vencedora{filter:drop-shadow(0 0 22px #ffcf6b);transform:scale(1.15)}
+
+  /* PEGA O GABRIEL */
+  #pega{justify-content:flex-start;padding-top:56px}
+  #pega h2{font-size:2.4rem}
+  #pegaMsg{margin-top:8px;opacity:.85;min-height:1.4em}
+  .alvo{
+    position:fixed;z-index:2;padding:10px 26px 14px;border-radius:999px;cursor:pointer;touch-action:none;
+    font:700 2.2rem 'Dancing Script',cursive;color:#fff;white-space:nowrap;
+    background:linear-gradient(135deg,#ff5c8a,#ff8fab);box-shadow:0 10px 30px rgba(255,92,138,.5);
+    transition:left .22s cubic-bezier(.3,1.4,.6,1),top .22s cubic-bezier(.3,1.4,.6,1)
+  }
+  .alvo.cansado{animation:pulsar 1.4s infinite;background:linear-gradient(135deg,#ffcf6b,#ff8fab)}
 
   /* CARTA */
   #carta{justify-content:flex-start;overflow-y:auto;padding-top:40px}
@@ -139,25 +173,26 @@
 <!-- 1. INTRO -->
 <section id="intro" class="tela ativa">
   <h1 class="cursiva" id="introTitulo"></h1>
-  <p>Tenho uma coisinha pra você…</p>
+  <p>Tenho uma carta pra você…</p>
   <div class="envelope" id="envelope">
-    <div class="corpo"></div><div class="aba"></div><div class="selo">💌</div>
+    <div class="corpo"></div><div class="aba"></div><div class="selo">🔒</div>
   </div>
-  <div class="toque">toque no envelope</div>
+  <div class="toque" id="introToque">toque no envelope</div>
 </section>
 
 <!-- 2. JOGO -->
 <section id="jogo" class="tela">
   <canvas id="canvasJogo"></canvas>
   <div class="hud">
-    <div class="titulo cursiva">Pegue os corações 💖</div>
+    <div class="etapa">🔒 Desafio 1 de 3</div>
+    <div class="titulo cursiva">Pegue os corações</div>
     <div class="barra"><i id="barra"></i></div>
     <div class="contador" id="contador"></div>
   </div>
   <div id="motivo"><small>um motivo pelo qual eu te amo:</small><span></span></div>
   <div class="instrucao" id="instrucao">arraste o dedo pra mover a cestinha 🧺<br>e cuidado com as nuvens de chuva 🌧️</div>
   <div class="overlay" id="fimJogo">
-    <h2 class="cursiva">Você conseguiu! 🥹</h2>
+    <h2 class="cursiva">Você conseguiu! 😭</h2>
     <p style="margin-top:10px;opacity:.85">Mas a próxima fase é pra ver se você me conhece mesmo…</p>
     <button class="btn" id="irQuiz">Bora pro quiz 😏</button>
   </div>
@@ -165,12 +200,40 @@
 
 <!-- 3. QUIZ -->
 <section id="quiz" class="tela">
+  <div class="etapa">🔒 Desafio 2 de 3</div>
+  <div class="casal">
+    <span class="nome" id="nomeEla"></span><span class="mais">+</span><span class="nome" id="nomeEle"></span>
+  </div>
   <div class="cartao" id="cartaoQuiz">
     <div class="quiz-num" id="quizNum"></div>
     <div class="quiz-pergunta" id="quizPergunta"></div>
     <div class="opcoes" id="quizOpcoes"></div>
     <div class="quiz-feedback" id="quizFeedback"></div>
   </div>
+</section>
+
+<!-- 3b. PEGA O GABRIEL -->
+<section id="pega" class="tela">
+  <div class="etapa">🔒 Desafio 3 de 3</div>
+  <h2 class="cursiva">Agora é sua vez</h2>
+  <p id="pegaMsg"></p>
+  <div class="alvo" id="alvoGabriel"></div>
+  <div class="overlay" id="fimPega">
+    <h2 class="cursiva">Me pegou</h2>
+    <p style="margin-top:10px;opacity:.9">Na verdade você já me pegou faz tempo</p>
+    <button class="btn" id="irCarta">Destrancar a carta</button>
+  </div>
+</section>
+
+<!-- 3c. CARTA DESTRANCADA -->
+<section id="desbloqueio" class="tela">
+  <div class="etapa">3 de 3 desafios vencidos</div>
+  <h1 class="cursiva" style="font-size:2.4rem">Você venceu tudo</h1>
+  <p style="opacity:.85">Agora sim</p>
+  <div class="envelope" id="envelope2">
+    <div class="corpo"></div><div class="aba"></div><div class="selo" id="selo2">🔒</div>
+  </div>
+  <div class="toque" id="toque2" style="visibility:hidden">toque pra abrir</div>
 </section>
 
 <!-- 4. CARTA -->
@@ -183,13 +246,13 @@
   <div class="rodape">
     <div class="pular" id="pular">toque na carta pra pular</div>
     <div class="juntos" id="juntos"></div>
-    <button class="btn" id="irBolo" style="display:none">Ainda tem mais uma coisa… 🎁</button>
+    <button class="btn" id="irBolo" style="display:none">Ainda tem mais uma coisa…</button>
   </div>
 </section>
 
 <!-- 5. BOLO -->
 <section id="bolo" class="tela">
-  <h2 class="cursiva">Faz um pedido ✨</h2>
+  <h2 class="cursiva">Faz um pedido</h2>
   <p style="opacity:.85">e apaga as velinhas</p>
   <div class="bolo">
     <div class="prato"></div>
@@ -198,10 +261,10 @@
     <div class="cobertura"></div>
     <div class="velas" id="velas"></div>
   </div>
-  <div class="dica" id="dica">toque nas chamas 🔥 — ou…</div>
-  <button class="btn sec" id="btnSoprar">🎤 soprar de verdade</button>
+  <div class="dica" id="dica">toque nas chamas — ou…</div>
+  <button class="btn sec" id="btnSoprar">soprar de verdade</button>
   <div id="final">
-    <h3 class="cursiva">Feliz aniversário! 🎉</h3>
+    <h3 class="cursiva">Feliz aniversário!</h3>
     <p id="finalTexto"></p>
     <button class="btn sec" id="recomecar" style="margin-top:28px">ver tudo de novo ↺</button>
   </div>
@@ -212,10 +275,11 @@
    ✏️  PERSONALIZE AQUI — é só trocar os textos entre aspas
    ========================================================= */
 const CONFIG = {
-  nomeDela: "Meu Amor",
-  seuNome: "Seu namorado",
-  inicioNamoro: "2024-01-01",   // data que vocês começaram (AAAA-MM-DD). Deixe "" pra esconder o contador
+  nomeDela: "Elisa",
+  seuNome: "Gabriel",
+  inicioNamoro: "2026-02-15",   // data que vocês começaram (AAAA-MM-DD). Deixe "" pra esconder o contador
   metaCoracoes: 12,             // quantos corações ela precisa pegar
+  fugasGabriel: 10,             // quantas vezes o "Gabriel" foge antes de se deixar pegar
   velas: 5,
 
   motivos: [
@@ -230,34 +294,60 @@ const CONFIG = {
     "você é minha melhor amiga",
     "com você, até o tédio é bom",
     "você é corajosa demais",
-    "simplesmente porque é você 💖"
+    "simplesmente porque é você"
   ],
 
   // resposta: posição da opção correta (0 = primeira, 1 = segunda...)
+  // pegadinha: true → nenhuma opção é certa; a resposta é tocar no nome dela no topo da tela
   quiz: [
+    { pergunta: "O que dizia o reel completamente aleatório que te enviei quando nem nos falávamos?",
+      opcoes: ["Algo sobre jogos", "Algo sobre mulheres", "Algo sobre futebol", "Algo sobre carros"],
+      resposta: 2, comentario: "Até hoje não sei porque te mandei aquilo 😭" },
     { pergunta: "O que eu tinha na mão o tempo todo durante a primeira vez que nos vimos?",
       opcoes: ["Telemóvel", "Garrafa de água", "Um café", "As chaves do carro"],
-      resposta: 1, comentario: "Nervoso demais pra largar aquela garrafa 😅💧" },
-    { pergunta: "Qual é a minha comida favorita?",
-      opcoes: ["Pizza", "Hambúrguer", "Sushi", "Lasanha"],
-      resposta: 0, comentario: "Já sabe o que pedir hoje à noite 🍕" },
+      resposta: 1, comentario: "Nervoso demais pra largar aquela garrafa 😭" },
+    { pergunta: "Qual o nome das minhas avós?",
+      opcoes: ["Maria e Regina", "Eliza e Malu", "Regina e Malu", "Augusta e Maria"],
+      resposta: 2, comentario: "Elas iam adorar saber que você acertou" },
+    { pergunta: "Qual a minha comida favorita?",
+      opcoes: ["Sushi", "Lasanha", "Pizza", "Hambúrguer"],
+      pegadinha: true, comentario: "Minha favorita é você 😏" },
+    { pergunta: "Qual era a cor principal do primeiro ramo de flores que te dei?",
+      opcoes: ["Vermelho", "Rosa", "Amarelo", "Branco"],
+      resposta: 2, comentario: "Amarelo, como a luz que você traz pros meus dias" },
+    // certas: várias opções corretas
+    { pergunta: "Quem se atrasa mais?",
+      opcoes: ["Elisa", "ELISA", "A Elisa, óbvio", "elisinha"],
+      certas: [0, 1, 2, 3], comentario: "Pelo menos você é sincera 😭" },
+    // foge: a opção nessa posição foge do dedo e nunca pode ser escolhida
+    { pergunta: "Quem é que manda na relação?",
+      opcoes: ["Gabriel", "Elisa", "O Gabriel", "GABRIEL"],
+      certas: [0, 2, 3], foge: 1, comentario: "Sabia que você ia reconhecer 😏" },
+    { pergunta: "Qual música eu mais dediquei a ti?",
+      opcoes: ["Perfect", "Something About You", "Until I Found You", "Heaven"],
+      certas: [1, 3], comentario: "Toda vez que toca eu lembro de você" },
     { pergunta: "Quem disse \"eu te amo\" primeiro?",
-      opcoes: ["Eu", "Você", "Os dois juntos", "Ninguém lembra 😅"],
-      resposta: 0, comentario: "E falaria de novo mil vezes 💘" },
+      opcoes: ["Eu", "Você", "Os dois juntos", "Ninguém lembra 😭"],
+      resposta: 0, comentario: "E falaria de novo mil vezes" },
     { pergunta: "O que eu mais amo em você?",
       opcoes: ["O sorriso", "O jeito", "Tudo", "Tudo, e mais um pouco"],
-      resposta: 3, comentario: "Pergunta pegadinha, era óbvio 😌" }
+      resposta: 3, comentario: "Essa era fácil" }
   ],
-  errou: ["Errou! Vou fingir que não vi 😤", "Hmm… tenta de novo 🤨", "Amor??? 😭", "Quase! Ou não 😂"],
+  errou: ["Errou! Vou fingir que não vi 😔", "Tenta de novo", "Amor??? 😭", "Quase! Ou não 😢"],
 
   cartaTitulo: "Feliz aniversário, meu amor",
   carta: [
+    "Hoje o mundo comemora mais um ano seu. Eu comemoro mais um ano de ter você.",
     "Hoje é o seu dia, e eu queria fazer algo que fosse só seu — por isso esse cantinho aqui.",
+    "Faz só 9 meses, mas parece que te conheço a vida inteira, e que ainda tenho a vida inteira pra te conhecer.",
     "Obrigado por cada risada, cada conversa até tarde, cada abraço que faz o mundo parar. Você transforma dias comuns em lembranças que eu guardo com o maior carinho.",
     "Que esse novo ano da sua vida seja leve, cheio de conquistas e de motivos pra sorrir. E que eu esteja do seu lado em cada um deles.",
-    "Te amo mais do que cabe nessa tela."
+    "Eu admiro a mulher que você é, e fico orgulhoso de ver quem você está se tornando.",
+    "Obrigado por tudo que faz e tem feito por nós. Meu futuro já se transformou em \"nosso\" e não posso mais esperar pra viver com você a vida que quero viver. Meu sonho sempre foi te conhecer; depois de te conhecer, ele mudou: agora espero morrer com você.",
+    "Te amo mais do que cabe nessa tela.",
+    "Feliz aniversário, minha Elisa."
   ],
-  finalTexto: "Que todos os seus pedidos se realizem — e que eu faça parte de alguns deles 🤍"
+  finalTexto: "Que todos os seus pedidos se realizem — e que eu faça parte de alguns deles"
 };
 /* ========================================================= */
 
@@ -284,12 +374,21 @@ function mostrar(id){
 
 /* ---------- 1. INTRO ---------- */
 $('#introTitulo').textContent = 'Oi, ' + CONFIG.nomeDela + '!';
+let introTocado = false;
 $('#envelope').addEventListener('click', e => {
   const env = e.currentTarget;
-  if(env.classList.contains('aberto')) return;
-  env.classList.add('aberto');
-  vibrar(30);
-  setTimeout(() => { mostrar('jogo'); iniciarJogo(); }, 900);
+  env.classList.remove('tremer'); void env.offsetWidth; env.classList.add('tremer');
+  setTimeout(() => env.classList.remove('tremer'), 450);
+  vibrar([30,30,30]);
+  if(introTocado) return;
+  introTocado = true;
+  const t = $('#introToque');
+  t.style.animation = 'none'; t.style.opacity = 1;
+  t.innerHTML = 'Tá trancada 😏<br>Pra abrir, você tem que vencer 3 desafios';
+  const b = document.createElement('button');
+  b.className = 'btn'; b.id = 'comecar'; b.textContent = 'Aceito o desafio';
+  b.onclick = () => { mostrar('jogo'); iniciarJogo(); };
+  t.after(b);
 });
 
 /* ---------- 2. JOGO ---------- */
@@ -400,28 +499,129 @@ function renderPergunta(){
     const b = document.createElement('button');
     b.className = 'opcao'; b.textContent = op;
     b.onclick = () => responder(b, i);
+    if(q.foge === i){
+      b.addEventListener('pointerdown', e => { e.preventDefault(); fugir(b); });
+      b.addEventListener('pointerenter', e => { if(e.pointerType === 'mouse') fugir(b); });
+    }
     box.appendChild(b);
   });
+  fugas = 0;
   const c = $('#cartaoQuiz'); c.style.animation='none'; c.offsetHeight; c.style.animation='surgir .5s';
+}
+let travado = false;
+function acertou(q, extraConfete){
+  travado = true; vibrar(20); confete(extraConfete || 40);
+  [...$('#quizOpcoes').children].forEach(b => b.disabled = true);
+  $('#quizFeedback').textContent = (q.comentario || 'Acertou!');
+  setTimeout(() => {
+    $('#nomeEla').classList.remove('vencedora');
+    qi++; travado = false;
+    if(qi < CONFIG.quiz.length) renderPergunta();
+    else { mostrar('pega'); iniciarPega(); }
+  }, q.pegadinha ? 2800 : 1900);
+}
+let fugas = 0;
+function fugir(b){
+  if(travado) return;
+  const box = b.parentNode;
+  const outras = [...box.children].filter(x => x !== b);
+  const alvo = outras[Math.floor(Math.random() * outras.length)];
+  const marca = document.createElement('span');
+  box.replaceChild(marca, alvo);   // troca de lugar com outra opção
+  box.replaceChild(alvo, b);
+  box.replaceChild(b, marca);
+  b.style.animation = 'none'; void b.offsetWidth; b.style.animation = 'surgir .35s';
+  vibrar(10);
+  fugas++;
+  if(fugas === 3) $('#quizFeedback').textContent = 'Desiste amor 😏';
+  if(fugas === 7) $('#quizFeedback').textContent = 'Amor??? 😭 aceita';
 }
 function responder(btn, i){
   const q = CONFIG.quiz[qi];
-  if(btn.disabled) return;
-  if(i === q.resposta){
-    btn.classList.add('certa'); vibrar(20); confete(40);
-    [...$('#quizOpcoes').children].forEach(b => b.disabled = true);
-    $('#quizFeedback').textContent = '✅ ' + (q.comentario || 'Acertou!');
-    setTimeout(() => {
-      qi++;
-      if(qi < CONFIG.quiz.length) renderPergunta();
-      else { mostrar('carta'); iniciarCarta(); }
-    }, 1900);
+  if(btn.disabled || travado) return;
+  if(q.foge === i){ fugir(btn); return; }
+  const certa = q.certas ? q.certas.includes(i) : i === q.resposta;
+  if(!q.pegadinha && certa){
+    btn.classList.add('certa'); acertou(q);
   } else {
     btn.classList.add('errada'); btn.disabled = true; vibrar([30,30,30]);
     btn.classList.add('tremer'); setTimeout(()=>btn.classList.remove('tremer'),400);
-    $('#quizFeedback').textContent = CONFIG.errou[Math.floor(Math.random()*CONFIG.errou.length)];
+    let msg = CONFIG.errou[Math.floor(Math.random()*CONFIG.errou.length)];
+    if(q.pegadinha){
+      const erros = [...$('#quizOpcoes').children].filter(b => b.disabled).length;
+      if(erros === 2) msg = 'Hmm… talvez a resposta nem esteja nessas opções';
+      if(erros >= 3) msg = 'Dica: olha bem pro topo da tela';
+    }
+    $('#quizFeedback').textContent = msg;
   }
 }
+// selo do casal: tocar no nome dela é a resposta da pegadinha
+$('#nomeEla').textContent = CONFIG.nomeDela;
+$('#nomeEle').textContent = CONFIG.seuNome;
+['#nomeEla','#nomeEle'].forEach(sel => $(sel).addEventListener('click', e => {
+  const el = e.currentTarget, q = CONFIG.quiz[qi];
+  if(sel === '#nomeEla' && q && q.pegadinha && !travado){
+    el.classList.add('vencedora'); acertou(q, 160); return;
+  }
+  el.classList.remove('pular'); void el.offsetWidth; el.classList.add('pular');
+}));
+
+/* ---------- 3b. PEGA O GABRIEL ---------- */
+const alvo = $('#alvoGabriel');
+let pegaTent = 0, cansou = false;
+const PEGA_MSGS = { 0: 'Me pega se for capaz 😏', 3: 'Quase', 6: 'Tá difícil né 😏' };
+function posicionarAlvo(x, y){ alvo.style.left = x + 'px'; alvo.style.top = y + 'px'; }
+function iniciarPega(){
+  pegaTent = 0; cansou = false;
+  alvo.textContent = CONFIG.seuNome; alvo.classList.remove('cansado');
+  $('#fimPega').classList.remove('ativa'); alvo.style.display = '';
+  $('#pegaMsg').textContent = PEGA_MSGS[0];
+  requestAnimationFrame(() => posicionarAlvo((innerWidth - alvo.offsetWidth) / 2, innerHeight * .5));
+}
+function pularAlvo(){
+  if(cansou) return;
+  const w = alvo.offsetWidth, h = alvo.offsetHeight;
+  const x0 = parseFloat(alvo.style.left) || 0, y0 = parseFloat(alvo.style.top) || 0;
+  let x, y, tent = 0;
+  do {   // escolhe um lugar novo longe do dedo
+    x = 16 + Math.random() * Math.max(1, innerWidth - w - 32);
+    y = 150 + Math.random() * Math.max(1, innerHeight - h - 190);
+  } while(Math.hypot(x - x0, y - y0) < Math.min(160, innerWidth * .4) && ++tent < 20);
+  posicionarAlvo(x, y);
+  vibrar(10);
+  pegaTent++;
+  if(PEGA_MSGS[pegaTent]) $('#pegaMsg').textContent = PEGA_MSGS[pegaTent];
+  if(pegaTent >= CONFIG.fugasGabriel){
+    cansou = true; alvo.classList.add('cansado');
+    $('#pegaMsg').textContent = 'Tá bom, cansei, pode me pegar 😔';
+  }
+}
+alvo.addEventListener('pointerdown', e => { if(!cansou){ e.preventDefault(); pularAlvo(); } });
+alvo.addEventListener('pointerenter', e => { if(e.pointerType === 'mouse') pularAlvo(); });
+alvo.addEventListener('click', () => {
+  if(!cansou) return;
+  alvo.style.display = 'none'; vibrar([40,40,80]); confete(200);
+  setTimeout(() => $('#fimPega').classList.add('ativa'), 500);
+});
+$('#irCarta').addEventListener('click', () => {
+  mostrar('desbloqueio');
+  const env = $('#envelope2'), selo = $('#selo2');
+  env.classList.remove('aberto'); selo.textContent = '🔒'; $('#toque2').style.visibility = 'hidden';
+  setTimeout(() => {   // o cadeado vira coração
+    selo.style.transition = 'transform .3s'; selo.style.transform = 'translate(-50%,-50%) scale(1.6)';
+    vibrar(30);
+    setTimeout(() => {
+      selo.textContent = '💌'; selo.style.transform = 'translate(-50%,-50%) scale(1)';
+      $('#toque2').style.visibility = 'visible'; confete(80);
+    }, 300);
+  }, 1100);
+});
+$('#envelope2').addEventListener('click', e => {
+  const env = e.currentTarget;
+  if($('#selo2').textContent !== '💌' || env.classList.contains('aberto')) return;
+  env.classList.add('aberto'); vibrar(30);
+  setTimeout(() => { mostrar('carta'); iniciarCarta(); }, 900);
+});
 
 /* ---------- 4. CARTA ---------- */
 let pularCarta = false, cartaRodando = false;
@@ -460,7 +660,7 @@ function mostrarJuntos(){
     const d = Math.floor(s/86400); s%=86400;
     const h = Math.floor(s/3600); s%=3600;
     const m = Math.floor(s/60); s%=60;
-    $('#juntos').innerHTML = 'juntos há <b>' + d + '</b> dias, <b>' + h + '</b>h <b>' + m + '</b>min <b>' + s + '</b>s 💞';
+    $('#juntos').innerHTML = 'juntos há <b>' + d + '</b> dias, <b>' + h + '</b>h <b>' + m + '</b>min <b>' + s + '</b>s';
   };
   atualizar(); clearInterval(timerJuntos); timerJuntos = setInterval(atualizar, 1000);
 }
@@ -502,7 +702,7 @@ $('#btnSoprar').addEventListener('click', async () => {
     const an = ac.createAnalyser(); an.fftSize = 512;
     ac.createMediaStreamSource(streamMic).connect(an);
     const dados = new Uint8Array(an.fftSize);
-    $('#btnSoprar').textContent = '🌬️ sopra forte no celular!';
+    $('#btnSoprar').textContent = 'sopra forte no celular!';
     let forte = 0;
     const ouvir = () => {
       if(!streamMic) { ac.close(); return; }
@@ -519,15 +719,17 @@ $('#btnSoprar').addEventListener('click', async () => {
     };
     ouvir();
   }catch(e){
-    $('#btnSoprar').textContent = 'sem microfone 😅 toque nas chamas';
+    $('#btnSoprar').textContent = 'sem microfone 😢 toque nas chamas';
   }
 });
 function pararMic(){ if(streamMic){ streamMic.getTracks().forEach(t=>t.stop()); streamMic = null; } }
 $('#recomecar').addEventListener('click', () => {
-  $('#envelope').classList.remove('aberto'); $('#fimJogo').classList.remove('ativa');
+  $('#fimJogo').classList.remove('ativa');
+  introTocado = false; const cb = $('#comecar'); if(cb) cb.remove();
+  $('#introToque').textContent = 'toque no envelope'; $('#introToque').style.animation = '';
   $('#instrucao').style.opacity = .85; $('#juntos').innerHTML=''; $('#irBolo').style.display='none';
   $('#pular').style.display=''; $('#assinatura').style.opacity=0;
-  $('#btnSoprar').textContent = '🎤 soprar de verdade';
+  $('#btnSoprar').textContent = 'soprar de verdade';
   mostrar('intro');
 });
 
