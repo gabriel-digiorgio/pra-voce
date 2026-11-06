@@ -396,7 +396,7 @@ const cv = $('#canvasJogo'), ctx = cv.getContext('2d');
 let W, H, dpr, jogo = null;
 function redimensionar(){
   dpr = Math.min(window.devicePixelRatio||1, 2);
-  W = cv.clientWidth; H = cv.clientHeight;
+  W = cv.clientWidth || innerWidth; H = cv.clientHeight || innerHeight;
   cv.width = W*dpr; cv.height = H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
 }
 window.addEventListener('resize', () => { if(jogo) redimensionar(); });
@@ -414,15 +414,53 @@ cv.addEventListener('touchmove', e => { e.preventDefault(); moverPara(e.touches[
 
 function spawn(){
   const ruim = Math.random() < .22 && jogo.pontos > 1;
-  const bons = ['💖','💗','💕','🌹','💝'];
+  const cores = ['#ff5c8a','#ff8fab','#ff3d6e','#ffb3c6','#e0245e'];
   jogo.itens.push({
     x: 30 + Math.random()*(W-60), y: -30,
     vy: 2.2 + Math.random()*1.6 + jogo.pontos*.08,
     vx: (Math.random()-.5)*.6,
     rot: Math.random()*6, vr:(Math.random()-.5)*.05,
-    ruim, emoji: ruim ? '🌧️' : bons[Math.floor(Math.random()*bons.length)],
-    tam: ruim ? 38 : 34
+    ruim, cor: cores[Math.floor(Math.random()*cores.length)],
+    tam: ruim ? 40 : 30 + Math.random()*8
   });
+}
+/* desenhos feitos à mão (emoji não aparece no canvas de alguns celulares) */
+function desenharCoracao(s, cor){
+  ctx.beginPath();
+  ctx.moveTo(0, s*.38);
+  ctx.bezierCurveTo(-s*.08, s*.3, -s*.52, s*.05, -s*.52, -s*.16);
+  ctx.bezierCurveTo(-s*.52, -s*.46, -s*.14, -s*.56, 0, -s*.26);
+  ctx.bezierCurveTo(s*.14, -s*.56, s*.52, -s*.46, s*.52, -s*.16);
+  ctx.bezierCurveTo(s*.52, s*.05, s*.08, s*.3, 0, s*.38);
+  ctx.closePath();
+  ctx.shadowColor = 'rgba(255,92,138,.7)'; ctx.shadowBlur = 12;
+  ctx.fillStyle = cor; ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = 'rgba(255,255,255,.55)';
+  ctx.beginPath(); ctx.ellipse(-s*.24, -s*.2, s*.09, s*.06, -.6, 0, 7); ctx.fill();
+}
+function desenharNuvem(s){
+  ctx.fillStyle = '#9fb3d9';
+  ctx.beginPath();
+  ctx.arc(-s*.25, 0, s*.24, 0, 7); ctx.arc(s*.02, -s*.14, s*.3, 0, 7); ctx.arc(s*.28, 0, s*.22, 0, 7);
+  ctx.fill();
+  ctx.fillRect(-s*.25, -s*.02, s*.53, s*.24);
+  ctx.strokeStyle = '#6fa8ff'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+  for(const dx of [-.22, 0, .22]){
+    ctx.beginPath(); ctx.moveTo(s*dx, s*.34); ctx.lineTo(s*dx - 4, s*.52); ctx.stroke();
+  }
+}
+function desenharCesta(x, y){
+  ctx.save(); ctx.translate(x, y);
+  ctx.strokeStyle = '#c98b4b'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.arc(0, -4, 26, Math.PI, 0); ctx.stroke();           // alça
+  ctx.fillStyle = '#d99a5b';
+  ctx.beginPath(); ctx.moveTo(-36, -4); ctx.lineTo(36, -4); ctx.lineTo(28, 30); ctx.lineTo(-28, 30); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#a8703a'; ctx.lineWidth = 2;
+  for(let i=-2;i<=2;i++){ ctx.beginPath(); ctx.moveTo(i*13, -4); ctx.lineTo(i*10.5, 30); ctx.stroke(); }
+  for(const yy of [8, 19]){ ctx.beginPath(); ctx.moveTo(-34+yy*.25, yy); ctx.lineTo(34-yy*.25, yy); ctx.stroke(); }
+  ctx.fillStyle = '#b97c40'; ctx.fillRect(-38, -8, 76, 8);
+  ctx.restore();
 }
 function atualizarHud(){
   $('#barra').style.width = (jogo.pontos/CONFIG.metaCoracoes*100)+'%';
@@ -454,7 +492,8 @@ function loop(t){
     const it = jogo.itens[i];
     it.y += it.vy; it.x += it.vx; it.rot += it.vr;
     ctx.save(); ctx.translate(it.x,it.y); ctx.rotate(Math.sin(it.rot)*.3);
-    ctx.font = it.tam+'px serif'; ctx.fillText(it.emoji,0,0); ctx.restore();
+    if(it.ruim) desenharNuvem(it.tam); else desenharCoracao(it.tam, it.cor);
+    ctx.restore();
 
     if(it.y > cestaY-28 && it.y < cestaY+20 && Math.abs(it.x - jogo.cestaX) < 46){
       jogo.itens.splice(i,1);
@@ -476,7 +515,7 @@ function loop(t){
   }
   // cesta
   let dx = 0; if(jogo.tremer>0){ dx = (Math.random()-.5)*10; jogo.tremer--; }
-  ctx.font='56px serif'; ctx.fillText('🧺', jogo.cestaX+dx, cestaY);
+  desenharCesta(jogo.cestaX+dx, cestaY);
   requestAnimationFrame(loop);
 }
 function terminarJogo(){
