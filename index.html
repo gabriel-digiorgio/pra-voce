@@ -83,6 +83,13 @@
   .opcoes{display:flex;flex-direction:column;gap:10px}
   .opcao{border:2px solid #f2c4cf;background:#fff;color:var(--vinho);border-radius:14px;padding:13px 14px;font:600 1rem 'Quicksand',sans-serif;cursor:pointer;transition:all .2s;text-align:left}
   .opcao:active{transform:scale(.98)}
+  /* segurar pra confirmar */
+  .opcao,.alvo,.casal .nome{position:relative;overflow:hidden;isolation:isolate;touch-action:none;-webkit-touch-callout:none}
+  .seg-barra{position:absolute;left:0;top:0;bottom:0;width:0;z-index:-1;pointer-events:none;background:linear-gradient(90deg,#ffc2d1,#ff8fab)}
+  .opcao.segurando{border-color:#ff5c8a}
+  .alvo .seg-barra{background:rgba(255,255,255,.4)}
+  .casal .nome .seg-barra{top:auto;height:5px;bottom:2px;border-radius:3px;background:#ffcf6b;z-index:1}
+  .quiz-dica{font-size:.75rem;opacity:.55;margin:-10px 0 14px}
   .opcao.certa{background:#d9f7e2;border-color:#4cc77a;color:#1e6b3c}
   .opcao.errada{background:#ffe0e0;border-color:#ff7b7b;opacity:.6}
   .quiz-feedback{min-height:48px;margin-top:16px;font-weight:600;font-size:.95rem}
@@ -207,6 +214,7 @@
   <div class="cartao" id="cartaoQuiz">
     <div class="quiz-num" id="quizNum"></div>
     <div class="quiz-pergunta" id="quizPergunta"></div>
+    <div class="quiz-dica">segura na resposta pra confirmar</div>
     <div class="opcoes" id="quizOpcoes"></div>
     <div class="quiz-feedback" id="quizFeedback"></div>
   </div>
@@ -217,7 +225,7 @@
   <div class="etapa">🔒 Desafio 3 de 3</div>
   <h2 class="cursiva">Agora é sua vez</h2>
   <p id="pegaMsg"></p>
-  <div class="alvo" id="alvoGabriel"></div>
+  <div class="alvo" id="alvoGabriel"><span id="alvoNome"></span></div>
   <div class="overlay" id="fimPega">
     <h2 class="cursiva">Me pegou</h2>
     <p style="margin-top:10px;opacity:.9">Na verdade você já me pegou faz tempo</p>
@@ -356,6 +364,37 @@ const telas = [...document.querySelectorAll('.tela')];
 function mostrar(id){
   telas.forEach(t => t.classList.toggle('ativa', t.id === id));
   $('#bg-coracoes').style.display = id === 'jogo' ? 'none' : '';
+}
+
+/* segurar pra confirmar: barrinha enche enquanto o dedo fica em cima.
+   opts.ms = tempo; opts.aoIniciar() → false cancela; opts.aoProgresso(p) → false cancela; opts.aoCompletar() */
+function tornarSeguravel(el, opts){
+  const barra = document.createElement('i'); barra.className = 'seg-barra'; el.appendChild(barra);
+  let raf = null;
+  const cancelar = () => {
+    if(raf) cancelAnimationFrame(raf); raf = null;
+    el.classList.remove('segurando');
+    barra.style.transition = 'width .2s'; barra.style.width = '0';
+  };
+  el.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    if(raf) return;
+    if(opts.aoIniciar && opts.aoIniciar(e) === false) return;
+    const t0 = performance.now();
+    el.classList.add('segurando'); barra.style.transition = 'none';
+    vibrar(8);
+    const tick = agora => {
+      const p = Math.min(1, (agora - t0) / opts.ms);
+      barra.style.width = (p * 100) + '%';
+      if(opts.aoProgresso && opts.aoProgresso(p) === false){ cancelar(); return; }
+      if(p >= 1){ raf = null; el.classList.remove('segurando'); barra.style.width = '0'; opts.aoCompletar(); }
+      else raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+  });
+  ['pointerup','pointercancel'].forEach(ev => window.addEventListener(ev, () => { if(raf) cancelar(); }));
+  el.addEventListener('contextmenu', e => e.preventDefault());
+  return { cancelar };
 }
 
 /* corações de fundo */
@@ -537,11 +576,15 @@ function renderPergunta(){
   q.opcoes.forEach((op, i) => {
     const b = document.createElement('button');
     b.className = 'opcao'; b.textContent = op;
-    b.onclick = () => responder(b, i);
-    if(q.foge === i){
-      b.addEventListener('pointerdown', e => { e.preventDefault(); fugir(b); });
-      b.addEventListener('pointerenter', e => { if(e.pointerType === 'mouse') fugir(b); });
-    }
+    tornarSeguravel(b, {
+      ms: 1000,
+      aoIniciar: () => {
+        if(b.disabled || travado) return false;
+        if(q.foge === i){ fugir(b); return false; }   // a opção foge assim que ela encosta
+      },
+      aoCompletar: () => responder(b, i)
+    });
+    if(q.foge === i) b.addEventListener('pointerenter', e => { if(e.pointerType === 'mouse') fugir(b); });
     box.appendChild(b);
   });
   fugas = 0;
@@ -597,13 +640,16 @@ function responder(btn, i){
 // selo do casal: tocar no nome dela é a resposta da pegadinha
 $('#nomeEla').textContent = CONFIG.nomeDela;
 $('#nomeEle').textContent = CONFIG.seuNome;
-['#nomeEla','#nomeEle'].forEach(sel => $(sel).addEventListener('click', e => {
-  const el = e.currentTarget, q = CONFIG.quiz[qi];
-  if(sel === '#nomeEla' && q && q.pegadinha && !travado){
-    el.classList.add('vencedora'); acertou(q, 160); return;
-  }
-  el.classList.remove('pular'); void el.offsetWidth; el.classList.add('pular');
-}));
+function pularNome(el){ el.classList.remove('pular'); void el.offsetWidth; el.classList.add('pular'); }
+tornarSeguravel($('#nomeEla'), {
+  ms: 1000,
+  aoIniciar: () => {
+    const q = CONFIG.quiz[qi];
+    if(!q || !q.pegadinha || travado){ pularNome($('#nomeEla')); return false; }
+  },
+  aoCompletar: () => { $('#nomeEla').classList.add('vencedora'); acertou(CONFIG.quiz[qi], 160); }
+});
+$('#nomeEle').addEventListener('pointerdown', e => pularNome(e.currentTarget));
 
 /* ---------- 3b. PEGA O GABRIEL ---------- */
 const alvo = $('#alvoGabriel');
@@ -612,7 +658,7 @@ const PEGA_MSGS = { 0: 'Me pega se for capaz 😏', 3: 'Quase', 6: 'Tá difícil
 function posicionarAlvo(x, y){ alvo.style.left = x + 'px'; alvo.style.top = y + 'px'; }
 function iniciarPega(){
   pegaTent = 0; cansou = false;
-  alvo.textContent = CONFIG.seuNome; alvo.classList.remove('cansado');
+  $('#alvoNome').textContent = CONFIG.seuNome; alvo.classList.remove('cansado');
   $('#fimPega').classList.remove('ativa'); alvo.style.display = '';
   $('#pegaMsg').textContent = PEGA_MSGS[0];
   requestAnimationFrame(() => posicionarAlvo((innerWidth - alvo.offsetWidth) / 2, innerHeight * .5));
@@ -635,13 +681,19 @@ function pularAlvo(){
     $('#pegaMsg').textContent = 'Tá bom, cansei, pode me pegar 😔';
   }
 }
-alvo.addEventListener('pointerdown', e => { if(!cansou){ e.preventDefault(); pularAlvo(); } });
-alvo.addEventListener('pointerenter', e => { if(e.pointerType === 'mouse') pularAlvo(); });
-alvo.addEventListener('click', () => {
-  if(!cansou) return;
-  alvo.style.display = 'none'; vibrar([40,40,80]); confete(200);
-  setTimeout(() => $('#fimPega').classList.add('ativa'), 500);
+// ela segura nele; antes de cansar, ele foge no meio da barrinha
+let fogeEm = 1;
+tornarSeguravel(alvo, {
+  ms: 1000,
+  aoIniciar: () => { fogeEm = cansou ? 2 : .35 + Math.random() * .5; },
+  aoProgresso: p => { if(!cansou && p >= fogeEm){ pularAlvo(); return false; } },
+  aoCompletar: () => {
+    if(!cansou) return;
+    alvo.style.display = 'none'; vibrar([40,40,80]); confete(200);
+    setTimeout(() => $('#fimPega').classList.add('ativa'), 500);
+  }
 });
+alvo.addEventListener('pointerenter', e => { if(e.pointerType === 'mouse' && !alvo.classList.contains('segurando')) pularAlvo(); });
 $('#irCarta').addEventListener('click', () => {
   mostrar('desbloqueio');
   const env = $('#envelope2'), selo = $('#selo2');
