@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Feliz Aniversário 💖</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --rosa:#ff5c8a; --rosa-claro:#ffd1dc; --vinho:#7a1f3d; --creme:#fff8f0;
+    --fundo1:#2b0f2e; --fundo2:#5a1a4a; --ouro:#ffcf6b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden}
+  body{
+    font-family:'Quicksand',sans-serif;color:#fff;
+    background:radial-gradient(ellipse at top,var(--fundo2),var(--fundo1) 70%);
+    user-select:none;-webkit-user-select:none;touch-action:manipulation;
+  }
+  .cursiva{font-family:'Dancing Script',cursive}
+  .tela{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;text-align:center}
+  .tela.ativa{display:flex;animation:surgir .8s ease}
+  @keyframes surgir{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+  .btn{
+    margin-top:24px;border:none;border-radius:999px;padding:14px 28px;font:700 1.05rem 'Quicksand',sans-serif;
+    color:#fff;background:linear-gradient(135deg,#ff5c8a,#ff8fab);box-shadow:0 8px 24px rgba(255,92,138,.45);cursor:pointer;
+    transition:transform .15s
+  }
+  .btn:active{transform:scale(.95)}
+  .btn.sec{background:rgba(255,255,255,.12);box-shadow:none;border:1px solid rgba(255,255,255,.3);font-size:.9rem;padding:10px 20px}
+
+  /* corações flutuando no fundo */
+  #bg-coracoes{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+  #bg-coracoes span{position:absolute;bottom:-40px;opacity:.5;animation:subir linear infinite}
+  @keyframes subir{to{transform:translateY(-110vh) rotate(25deg);opacity:0}}
+  .tela>*{position:relative;z-index:1}
+
+  /* INTRO / envelope */
+  #intro h1{font-size:2.6rem;margin-bottom:8px}
+  #intro p{opacity:.85}
+  .envelope{width:220px;height:150px;margin:36px auto 0;position:relative;cursor:pointer;animation:flutuar 2.4s ease-in-out infinite}
+  @keyframes flutuar{50%{transform:translateY(-10px)}}
+  .envelope .corpo{position:absolute;inset:0;background:#fbe3e8;border-radius:8px;box-shadow:0 14px 40px rgba(0,0,0,.4)}
+  .envelope .corpo::before,.envelope .corpo::after{content:"";position:absolute;bottom:0;width:0;height:0;border-bottom:90px solid #f6cbd5}
+  .envelope .corpo::before{left:0;border-right:110px solid transparent}
+  .envelope .corpo::after{right:0;border-left:110px solid transparent}
+  .envelope .aba{position:absolute;top:0;left:0;width:0;height:0;border-left:110px solid transparent;border-right:110px solid transparent;border-top:85px solid #f2b6c4;transform-origin:top;transition:transform .6s;z-index:2}
+  .envelope .selo{position:absolute;left:50%;top:62px;transform:translate(-50%,-50%);font-size:2.2rem;z-index:3;transition:opacity .3s}
+  .envelope.aberto .aba{transform:rotateX(180deg)}
+  .envelope.aberto .selo{opacity:0}
+  .toque{margin-top:28px;font-size:.95rem;opacity:.75;animation:piscar 1.6s infinite}
+  @keyframes piscar{50%{opacity:.3}}
+
+  /* JOGO */
+  #jogo{padding:0}
+  #canvasJogo{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+  .hud{position:absolute;top:0;left:0;right:0;padding:16px;z-index:2;pointer-events:none}
+  .hud .titulo{font-size:1.6rem}
+  .barra{height:12px;border-radius:99px;background:rgba(255,255,255,.15);margin:10px auto 0;max-width:340px;overflow:hidden}
+  .barra i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff5c8a,#ffcf6b);transition:width .3s}
+  .contador{font-size:.85rem;margin-top:6px;opacity:.8}
+  #motivo{
+    position:absolute;left:50%;top:120px;transform:translateX(-50%) translateY(-10px);width:min(90vw,380px);z-index:3;pointer-events:none;
+    background:rgba(255,255,255,.95);color:var(--vinho);padding:12px 16px;border-radius:16px;font-weight:700;
+    box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:0;transition:all .35s
+  }
+  #motivo.mostrar{opacity:1;transform:translateX(-50%) translateY(0)}
+  #motivo small{display:block;font-weight:500;opacity:.6;font-size:.72rem;margin-bottom:2px}
+  .instrucao{position:absolute;bottom:130px;left:0;right:0;z-index:2;font-size:.95rem;opacity:.85;transition:opacity .6s;pointer-events:none}
+  .overlay{position:absolute;inset:0;z-index:5;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(43,15,46,.85);backdrop-filter:blur(4px);padding:24px}
+  .overlay.ativa{display:flex;animation:surgir .5s}
+  .overlay h2{font-size:2.4rem}
+  .tremer{animation:tremer .4s}
+  @keyframes tremer{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+
+  /* QUIZ */
+  .cartao{background:var(--creme);color:var(--vinho);border-radius:24px;padding:28px 20px;width:min(100%,420px);box-shadow:0 20px 50px rgba(0,0,0,.4)}
+  .quiz-num{font-size:.8rem;font-weight:700;letter-spacing:.1em;opacity:.55;text-transform:uppercase}
+  .quiz-pergunta{font-size:1.25rem;font-weight:700;margin:10px 0 20px;line-height:1.35}
+  .opcoes{display:flex;flex-direction:column;gap:10px}
+  .opcao{border:2px solid #f2c4cf;background:#fff;color:var(--vinho);border-radius:14px;padding:13px 14px;font:600 1rem 'Quicksand',sans-serif;cursor:pointer;transition:all .2s;text-align:left}
+  .opcao:active{transform:scale(.98)}
+  .opcao.certa{background:#d9f7e2;border-color:#4cc77a;color:#1e6b3c}
+  .opcao.errada{background:#ffe0e0;border-color:#ff7b7b;opacity:.6}
+  .quiz-feedback{min-height:48px;margin-top:16px;font-weight:600;font-size:.95rem}
+
+  /* CARTA */
+  #carta{justify-content:flex-start;overflow-y:auto;padding-top:40px}
+  .papel{
+    background:var(--creme);color:#4a2033;border-radius:6px;padding:32px 22px 28px;width:min(100%,460px);text-align:left;
+    box-shadow:0 20px 50px rgba(0,0,0,.45);position:relative;
+    background-image:repeating-linear-gradient(transparent 0 31px,#f1dfe3 31px 32px);line-height:32px;
+  }
+  .papel h2{font-size:2.1rem;color:var(--rosa);line-height:1.2;margin-bottom:12px}
+  .papel p{font-size:1.05rem;margin-bottom:16px;min-height:1px}
+  .papel .assinatura{text-align:right;font-family:'Dancing Script',cursive;font-size:1.7rem;color:var(--vinho)}
+  .cursor::after{content:"|";animation:piscar .8s infinite;color:var(--rosa)}
+  .juntos{margin-top:18px;font-size:.85rem;opacity:.85;line-height:1.5}
+  .juntos b{color:var(--ouro);font-size:1.1rem}
+  #carta .rodape{padding-bottom:40px;display:flex;flex-direction:column;align-items:center}
+  .pular{font-size:.75rem;opacity:.5;margin-top:10px}
+
+  /* BOLO */
+  #bolo h2{font-size:2.3rem;margin-bottom:6px}
+  .bolo{position:relative;width:240px;height:220px;margin:40px auto 0}
+  .prato{position:absolute;bottom:0;left:-20px;right:-20px;height:22px;background:#f4f4f8;border-radius:50%;box-shadow:0 6px 16px rgba(0,0,0,.4)}
+  .camada{position:absolute;left:0;right:0;border-radius:14px}
+  .c1{bottom:12px;height:80px;background:#e98aa6}
+  .c2{bottom:88px;height:70px;left:20px;right:20px;background:#f5b5c7}
+  .cobertura{position:absolute;bottom:146px;left:16px;right:16px;height:20px;background:#fff;border-radius:12px}
+  .cobertura::after{content:"";position:absolute;top:12px;left:10px;right:10px;height:18px;
+    background:radial-gradient(circle at 10px 0,#fff 9px,transparent 10px) 0 0/28px 18px repeat-x}
+  .c1::after{content:"";position:absolute;top:30px;left:0;right:0;height:10px;background:repeating-linear-gradient(90deg,#fff 0 6px,transparent 6px 22px);opacity:.7;border-radius:4px}
+  .velas{position:absolute;bottom:162px;left:0;right:0;display:flex;justify-content:center;gap:22px}
+  .vela{position:relative;width:10px;height:44px;border-radius:3px;background:repeating-linear-gradient(45deg,#7ec8ff 0 6px,#fff 6px 12px);cursor:pointer}
+  .vela::before{content:"";position:absolute;top:-6px;left:4px;width:2px;height:7px;background:#333}
+  .chama{position:absolute;left:50%;bottom:48px;width:16px;height:26px;transform:translateX(-50%);
+    background:radial-gradient(ellipse at 50% 70%,#fff 0 18%,#ffd34d 30%,#ff8a00 60%,transparent 70%);
+    border-radius:50% 50% 50% 50%/60% 60% 40% 40%;animation:tremular .15s infinite alternate;filter:drop-shadow(0 0 10px #ffb300)}
+  .vela::after{content:"";position:absolute;inset:-18px -14px;}/* área de toque maior */
+  @keyframes tremular{to{transform:translateX(-50%) scale(1.08,.94) rotate(3deg)}}
+  .vela.apagada .chama{display:none}
+  .fumaca{position:absolute;left:50%;bottom:48px;width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.6);transform:translateX(-50%);animation:fumaca 1.4s forwards;pointer-events:none}
+  @keyframes fumaca{to{transform:translate(-30%,-60px) scale(4);opacity:0}}
+  .dica{margin-top:30px;opacity:.8;font-size:.95rem}
+  #final{display:none;margin-top:10px}
+  #final h3{font-size:2.6rem;color:var(--ouro);animation:surgir 1s}
+  #final p{margin-top:8px;font-size:1.05rem;opacity:.9}
+
+  #confete{position:fixed;inset:0;pointer-events:none;z-index:50}
+</style>
+</head>
+<body>
+
+<div id="bg-coracoes"></div>
+<canvas id="confete"></canvas>
+
+<!-- 1. INTRO -->
+<section id="intro" class="tela ativa">
+  <h1 class="cursiva" id="introTitulo"></h1>
+  <p>Tenho uma coisinha pra você…</p>
+  <div class="envelope" id="envelope">
+    <div class="corpo"></div><div class="aba"></div><div class="selo">💌</div>
+  </div>
+  <div class="toque">toque no envelope</div>
+</section>
+
+<!-- 2. JOGO -->
+<section id="jogo" class="tela">
+  <canvas id="canvasJogo"></canvas>
+  <div class="hud">
+    <div class="titulo cursiva">Pegue os corações 💖</div>
+    <div class="barra"><i id="barra"></i></div>
+    <div class="contador" id="contador"></div>
+  </div>
+  <div id="motivo"><small>um motivo pelo qual eu te amo:</small><span></span></div>
+  <div class="instrucao" id="instrucao">arraste o dedo pra mover a cestinha 🧺<br>e cuidado com as nuvens de chuva 🌧️</div>
+  <div class="overlay" id="fimJogo">
+    <h2 class="cursiva">Você conseguiu! 🥹</h2>
+    <p style="margin-top:10px;opacity:.85">Mas a próxima fase é pra ver se você me conhece mesmo…</p>
+    <button class="btn" id="irQuiz">Bora pro quiz 😏</button>
+  </div>
+</section>
+
+<!-- 3. QUIZ -->
+<section id="quiz" class="tela">
+  <div class="cartao" id="cartaoQuiz">
+    <div class="quiz-num" id="quizNum"></div>
+    <div class="quiz-pergunta" id="quizPergunta"></div>
+    <div class="opcoes" id="quizOpcoes"></div>
+    <div class="quiz-feedback" id="quizFeedback"></div>
+  </div>
+</section>
+
+<!-- 4. CARTA -->
+<section id="carta" class="tela">
+  <div class="papel" id="papel">
+    <h2 class="cursiva" id="cartaTitulo"></h2>
+    <div id="cartaTexto"></div>
+    <div class="assinatura" id="assinatura" style="opacity:0"></div>
+  </div>
+  <div class="rodape">
+    <div class="pular" id="pular">toque na carta pra pular</div>
+    <div class="juntos" id="juntos"></div>
+    <button class="btn" id="irBolo" style="display:none">Ainda tem mais uma coisa… 🎁</button>
+  </div>
+</section>
+
+<!-- 5. BOLO -->
+<section id="bolo" class="tela">
+  <h2 class="cursiva">Faz um pedido ✨</h2>
+  <p style="opacity:.85">e apaga as velinhas</p>
+  <div class="bolo">
+    <div class="prato"></div>
+    <div class="camada c1"></div>
+    <div class="camada c2"></div>
+    <div class="cobertura"></div>
+    <div class="velas" id="velas"></div>
+  </div>
+  <div class="dica" id="dica">toque nas chamas 🔥 — ou…</div>
+  <button class="btn sec" id="btnSoprar">🎤 soprar de verdade</button>
+  <div id="final">
+    <h3 class="cursiva">Feliz aniversário! 🎉</h3>
+    <p id="finalTexto"></p>
+    <button class="btn sec" id="recomecar" style="margin-top:28px">ver tudo de novo ↺</button>
+  </div>
+</section>
+
+<script>
+/* =========================================================
+   ✏️  PERSONALIZE AQUI — é só trocar os textos entre aspas
+   ========================================================= */
+const CONFIG = {
+  nomeDela: "Meu Amor",
+  seuNome: "Seu namorado",
+  inicioNamoro: "2024-01-01",   // data que vocês começaram (AAAA-MM-DD). Deixe "" pra esconder o contador
+  metaCoracoes: 12,             // quantos corações ela precisa pegar
+  velas: 5,
+
+  motivos: [
+    "seu sorriso deixa qualquer dia melhor",
+    "você me entende só pelo olhar",
+    "seu abraço é meu lugar favorito",
+    "você ri das minhas piadas ruins",
+    "você é linda até de cara amassada de manhã",
+    "você me faz querer ser alguém melhor",
+    "você cuida de mim sem eu pedir",
+    "o jeito que você fala das coisas que ama",
+    "você é minha melhor amiga",
+    "com você, até o tédio é bom",
+    "você é corajosa demais",
+    "simplesmente porque é você 💖"
+  ],
+
+  // resposta: posição da opção correta (0 = primeira, 1 = segunda...)
+  quiz: [
+    { pergunta: "Onde foi nosso primeiro encontro?",
+      opcoes: ["No cinema", "Num barzinho", "Na praia", "Na casa de um amigo"],
+      resposta: 1, comentario: "Lembro de cada detalhe daquele dia 🥰" },
+    { pergunta: "Qual é a minha comida favorita?",
+      opcoes: ["Pizza", "Hambúrguer", "Sushi", "Lasanha"],
+      resposta: 0, comentario: "Já sabe o que pedir hoje à noite 🍕" },
+    { pergunta: "Quem disse \"eu te amo\" primeiro?",
+      opcoes: ["Eu", "Você", "Os dois juntos", "Ninguém lembra 😅"],
+      resposta: 0, comentario: "E falaria de novo mil vezes 💘" },
+    { pergunta: "O que eu mais amo em você?",
+      opcoes: ["O sorriso", "O jeito", "Tudo", "Tudo, e mais um pouco"],
+      resposta: 3, comentario: "Pergunta pegadinha, era óbvio 😌" }
+  ],
+  errou: ["Errou! Vou fingir que não vi 😤", "Hmm… tenta de novo 🤨", "Amor??? 😭", "Quase! Ou não 😂"],
+
+  cartaTitulo: "Feliz aniversário, meu amor",
+  carta: [
+    "Hoje é o seu dia, e eu queria fazer algo que fosse só seu — por isso esse cantinho aqui.",
+    "Obrigado por cada risada, cada conversa até tarde, cada abraço que faz o mundo parar. Você transforma dias comuns em lembranças que eu guardo com o maior carinho.",
+    "Que esse novo ano da sua vida seja leve, cheio de conquistas e de motivos pra sorrir. E que eu esteja do seu lado em cada um deles.",
+    "Te amo mais do que cabe nessa tela."
+  ],
+  finalTexto: "Que todos os seus pedidos se realizem — e que eu faça parte de alguns deles 🤍"
+};
+/* ========================================================= */
+
+const $ = s => document.querySelector(s);
+const telas = [...document.querySelectorAll('.tela')];
+function mostrar(id){
+  telas.forEach(t => t.classList.toggle('ativa', t.id === id));
+  $('#bg-coracoes').style.display = id === 'jogo' ? 'none' : '';
+}
+
+/* corações de fundo */
+(function(){
+  const bg = $('#bg-coracoes'), em = ['💖','💕','💗','🤍','✨'];
+  for(let i=0;i<16;i++){
+    const s=document.createElement('span');
+    s.textContent=em[i%em.length];
+    s.style.left=Math.random()*100+'%';
+    s.style.fontSize=(12+Math.random()*18)+'px';
+    s.style.animationDuration=(8+Math.random()*10)+'s';
+    s.style.animationDelay=(-Math.random()*15)+'s';
+    bg.appendChild(s);
+  }
+})();
+
+/* ---------- 1. INTRO ---------- */
+$('#introTitulo').textContent = 'Oi, ' + CONFIG.nomeDela + '!';
+$('#envelope').addEventListener('click', e => {
+  const env = e.currentTarget;
+  if(env.classList.contains('aberto')) return;
+  env.classList.add('aberto');
+  vibrar(30);
+  setTimeout(() => { mostrar('jogo'); iniciarJogo(); }, 900);
+});
+
+/* ---------- 2. JOGO ---------- */
+const cv = $('#canvasJogo'), ctx = cv.getContext('2d');
+let W, H, dpr, jogo = null;
+function redimensionar(){
+  dpr = Math.min(window.devicePixelRatio||1, 2);
+  W = cv.clientWidth; H = cv.clientHeight;
+  cv.width = W*dpr; cv.height = H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+window.addEventListener('resize', () => { if(jogo) redimensionar(); });
+
+function iniciarJogo(){
+  redimensionar();
+  jogo = { pontos:0, itens:[], particulas:[], cestaX:W/2, alvoX:W/2, ultimoSpawn:0, intervalo:750, motivoIdx:0, ativo:true, t0:performance.now(), tremer:0 };
+  atualizarHud();
+  requestAnimationFrame(loop);
+}
+function moverPara(x){ if(jogo) { jogo.alvoX = x; $('#instrucao').style.opacity = 0; } }
+cv.addEventListener('pointermove', e => moverPara(e.clientX));
+cv.addEventListener('pointerdown', e => moverPara(e.clientX));
+cv.addEventListener('touchmove', e => { e.preventDefault(); moverPara(e.touches[0].clientX); }, {passive:false});
+
+function spawn(){
+  const ruim = Math.random() < .22 && jogo.pontos > 1;
+  const bons = ['💖','💗','💕','🌹','💝'];
+  jogo.itens.push({
+    x: 30 + Math.random()*(W-60), y: -30,
+    vy: 2.2 + Math.random()*1.6 + jogo.pontos*.08,
+    vx: (Math.random()-.5)*.6,
+    rot: Math.random()*6, vr:(Math.random()-.5)*.05,
+    ruim, emoji: ruim ? '🌧️' : bons[Math.floor(Math.random()*bons.length)],
+    tam: ruim ? 38 : 34
+  });
+}
+function atualizarHud(){
+  $('#barra').style.width = (jogo.pontos/CONFIG.metaCoracoes*100)+'%';
+  $('#contador').textContent = jogo.pontos + ' / ' + CONFIG.metaCoracoes + ' corações';
+}
+let timerMotivo;
+function mostrarMotivo(){
+  const m = CONFIG.motivos[jogo.motivoIdx++ % CONFIG.motivos.length];
+  const el = $('#motivo'); el.querySelector('span').textContent = m;
+  el.classList.add('mostrar');
+  clearTimeout(timerMotivo); timerMotivo = setTimeout(() => el.classList.remove('mostrar'), 2200);
+}
+function explodir(x,y,cor){
+  for(let i=0;i<10;i++) jogo.particulas.push({x,y,vx:(Math.random()-.5)*6,vy:(Math.random()-.8)*6,v:1,cor});
+}
+function loop(t){
+  if(!jogo || !jogo.ativo) return;
+  const cestaY = H - 70;
+  if(t - jogo.ultimoSpawn > jogo.intervalo){ spawn(); jogo.ultimoSpawn = t; jogo.intervalo = Math.max(420, 750 - jogo.pontos*25); }
+  jogo.cestaX += (jogo.alvoX - jogo.cestaX) * .25;
+
+  ctx.clearRect(0,0,W,H);
+  // chão brilhante
+  const g = ctx.createLinearGradient(0,H-120,0,H); g.addColorStop(0,'rgba(255,92,138,0)'); g.addColorStop(1,'rgba(255,92,138,.18)');
+  ctx.fillStyle = g; ctx.fillRect(0,H-120,W,120);
+
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  for(let i=jogo.itens.length-1;i>=0;i--){
+    const it = jogo.itens[i];
+    it.y += it.vy; it.x += it.vx; it.rot += it.vr;
+    ctx.save(); ctx.translate(it.x,it.y); ctx.rotate(Math.sin(it.rot)*.3);
+    ctx.font = it.tam+'px serif'; ctx.fillText(it.emoji,0,0); ctx.restore();
+
+    if(it.y > cestaY-28 && it.y < cestaY+20 && Math.abs(it.x - jogo.cestaX) < 46){
+      jogo.itens.splice(i,1);
+      if(it.ruim){
+        jogo.pontos = Math.max(0, jogo.pontos-1); jogo.tremer = 12; vibrar([40,40,40]);
+        explodir(it.x,it.y,'#8ab4ff');
+      } else {
+        jogo.pontos++; vibrar(15); explodir(it.x,it.y,'#ff5c8a'); mostrarMotivo();
+      }
+      atualizarHud();
+      if(jogo.pontos >= CONFIG.metaCoracoes){ terminarJogo(); return; }
+    } else if(it.y > H+40) jogo.itens.splice(i,1);
+  }
+  // partículas
+  for(let i=jogo.particulas.length-1;i>=0;i--){
+    const p = jogo.particulas[i]; p.x+=p.vx; p.y+=p.vy; p.vy+=.2; p.v-=.03;
+    if(p.v<=0){ jogo.particulas.splice(i,1); continue; }
+    ctx.globalAlpha = p.v; ctx.fillStyle = p.cor; ctx.beginPath(); ctx.arc(p.x,p.y,3.5,0,7); ctx.fill(); ctx.globalAlpha = 1;
+  }
+  // cesta
+  let dx = 0; if(jogo.tremer>0){ dx = (Math.random()-.5)*10; jogo.tremer--; }
+  ctx.font='56px serif'; ctx.fillText('🧺', jogo.cestaX+dx, cestaY);
+  requestAnimationFrame(loop);
+}
+function terminarJogo(){
+  jogo.ativo = false;
+  confete(120);
+  setTimeout(() => $('#fimJogo').classList.add('ativa'), 600);
+}
+$('#irQuiz').addEventListener('click', () => { mostrar('quiz'); iniciarQuiz(); });
+
+/* ---------- 3. QUIZ ---------- */
+let qi = 0;
+function iniciarQuiz(){ qi = 0; renderPergunta(); }
+function renderPergunta(){
+  const q = CONFIG.quiz[qi];
+  $('#quizNum').textContent = 'Pergunta ' + (qi+1) + ' de ' + CONFIG.quiz.length;
+  $('#quizPergunta').textContent = q.pergunta;
+  $('#quizFeedback').textContent = '';
+  const box = $('#quizOpcoes'); box.innerHTML = '';
+  q.opcoes.forEach((op, i) => {
+    const b = document.createElement('button');
+    b.className = 'opcao'; b.textContent = op;
+    b.onclick = () => responder(b, i);
+    box.appendChild(b);
+  });
+  const c = $('#cartaoQuiz'); c.style.animation='none'; c.offsetHeight; c.style.animation='surgir .5s';
+}
+function responder(btn, i){
+  const q = CONFIG.quiz[qi];
+  if(btn.disabled) return;
+  if(i === q.resposta){
+    btn.classList.add('certa'); vibrar(20); confete(40);
+    [...$('#quizOpcoes').children].forEach(b => b.disabled = true);
+    $('#quizFeedback').textContent = '✅ ' + (q.comentario || 'Acertou!');
+    setTimeout(() => {
+      qi++;
+      if(qi < CONFIG.quiz.length) renderPergunta();
+      else { mostrar('carta'); iniciarCarta(); }
+    }, 1900);
+  } else {
+    btn.classList.add('errada'); btn.disabled = true; vibrar([30,30,30]);
+    btn.classList.add('tremer'); setTimeout(()=>btn.classList.remove('tremer'),400);
+    $('#quizFeedback').textContent = CONFIG.errou[Math.floor(Math.random()*CONFIG.errou.length)];
+  }
+}
+
+/* ---------- 4. CARTA ---------- */
+let pularCarta = false, cartaRodando = false;
+function iniciarCarta(){
+  $('#cartaTitulo').textContent = CONFIG.cartaTitulo;
+  $('#assinatura').textContent = 'Com todo o meu amor, ' + CONFIG.seuNome;
+  const box = $('#cartaTexto'); box.innerHTML = '';
+  pularCarta = false; cartaRodando = true;
+  escrever(box).then(() => {
+    cartaRodando = false;
+    $('#assinatura').style.transition = 'opacity 1s'; $('#assinatura').style.opacity = 1;
+    $('#pular').style.display = 'none';
+    mostrarJuntos();
+    setTimeout(() => $('#irBolo').style.display = 'inline-block', 800);
+  });
+}
+async function escrever(box){
+  for(const par of CONFIG.carta){
+    const p = document.createElement('p'); p.className = 'cursor'; box.appendChild(p);
+    for(let i=0;i<par.length;i++){
+      if(pularCarta){ p.textContent = par; break; }
+      p.textContent = par.slice(0,i+1);
+      await esperar(par[i] === '.' || par[i] === ',' ? 220 : 32);
+    }
+    p.classList.remove('cursor');
+    if(!pularCarta) await esperar(450);
+  }
+}
+$('#papel').addEventListener('click', () => { if(cartaRodando) pularCarta = true; });
+let timerJuntos;
+function mostrarJuntos(){
+  if(!CONFIG.inicioNamoro) return;
+  const ini = new Date(CONFIG.inicioNamoro + 'T00:00:00');
+  const atualizar = () => {
+    let s = Math.floor((Date.now() - ini) / 1000);
+    const d = Math.floor(s/86400); s%=86400;
+    const h = Math.floor(s/3600); s%=3600;
+    const m = Math.floor(s/60); s%=60;
+    $('#juntos').innerHTML = 'juntos há <b>' + d + '</b> dias, <b>' + h + '</b>h <b>' + m + '</b>min <b>' + s + '</b>s 💞';
+  };
+  atualizar(); clearInterval(timerJuntos); timerJuntos = setInterval(atualizar, 1000);
+}
+$('#irBolo').addEventListener('click', () => { mostrar('bolo'); iniciarBolo(); });
+
+/* ---------- 5. BOLO ---------- */
+let velasAcesas = 0, streamMic = null;
+function iniciarBolo(){
+  const box = $('#velas'); box.innerHTML = '';
+  $('#final').style.display = 'none'; $('#dica').style.display = ''; $('#btnSoprar').style.display = '';
+  velasAcesas = CONFIG.velas;
+  for(let i=0;i<CONFIG.velas;i++){
+    const v = document.createElement('div'); v.className = 'vela';
+    v.style.transform = 'translateY(' + (i%2 ? 6 : 0) + 'px)';
+    v.innerHTML = '<div class="chama"></div>';
+    v.addEventListener('click', () => apagar(v));
+    box.appendChild(v);
+  }
+}
+function apagar(v){
+  if(v.classList.contains('apagada')) return;
+  v.classList.add('apagada'); vibrar(15);
+  const f = document.createElement('div'); f.className = 'fumaca'; v.appendChild(f);
+  setTimeout(() => f.remove(), 1500);
+  velasAcesas--;
+  if(velasAcesas === 0) fimBolo();
+}
+function fimBolo(){
+  pararMic();
+  $('#dica').style.display = 'none'; $('#btnSoprar').style.display = 'none';
+  $('#finalTexto').textContent = CONFIG.finalTexto;
+  setTimeout(() => { $('#final').style.display = 'block'; confete(250); vibrar([60,60,120]); }, 500);
+  setTimeout(() => confete(150), 1800);
+}
+$('#btnSoprar').addEventListener('click', async () => {
+  try{
+    streamMic = await navigator.mediaDevices.getUserMedia({audio:true});
+    const ac = new (window.AudioContext||window.webkitAudioContext)();
+    const an = ac.createAnalyser(); an.fftSize = 512;
+    ac.createMediaStreamSource(streamMic).connect(an);
+    const dados = new Uint8Array(an.fftSize);
+    $('#btnSoprar').textContent = '🌬️ sopra forte no celular!';
+    let forte = 0;
+    const ouvir = () => {
+      if(!streamMic) { ac.close(); return; }
+      an.getByteTimeDomainData(dados);
+      let soma = 0; for(const x of dados){ const n=(x-128)/128; soma += n*n; }
+      const rms = Math.sqrt(soma/dados.length);
+      forte = rms > .18 ? forte+1 : Math.max(0, forte-1);
+      if(forte > 6){
+        forte = 0;
+        const acesa = [...document.querySelectorAll('.vela:not(.apagada)')];
+        acesa.slice(0, 2).forEach(apagar);
+      }
+      requestAnimationFrame(ouvir);
+    };
+    ouvir();
+  }catch(e){
+    $('#btnSoprar').textContent = 'sem microfone 😅 toque nas chamas';
+  }
+});
+function pararMic(){ if(streamMic){ streamMic.getTracks().forEach(t=>t.stop()); streamMic = null; } }
+$('#recomecar').addEventListener('click', () => {
+  $('#envelope').classList.remove('aberto'); $('#fimJogo').classList.remove('ativa');
+  $('#instrucao').style.opacity = .85; $('#juntos').innerHTML=''; $('#irBolo').style.display='none';
+  $('#pular').style.display=''; $('#assinatura').style.opacity=0;
+  $('#btnSoprar').textContent = '🎤 soprar de verdade';
+  mostrar('intro');
+});
+
+/* ---------- utilidades ---------- */
+function esperar(ms){ return new Promise(r => setTimeout(r, ms)); }
+function vibrar(p){ try{ navigator.vibrate && navigator.vibrate(p); }catch(e){} }
+
+const cc = $('#confete'), cx = cc.getContext('2d'); let pecas = [], confeteRodando = false;
+function confete(n){
+  const r = Math.min(window.devicePixelRatio||1,2);
+  cc.width = innerWidth*r; cc.height = innerHeight*r; cx.setTransform(r,0,0,r,0,0);
+  const cores = ['#ff5c8a','#ffcf6b','#ffffff','#ff8fab','#b388ff','#7ec8ff'];
+  for(let i=0;i<n;i++) pecas.push({
+    x: innerWidth/2 + (Math.random()-.5)*80, y: innerHeight*.45,
+    vx: (Math.random()-.5)*14, vy: -Math.random()*14-4,
+    r: Math.random()*6, vr: (Math.random()-.5)*.3,
+    w: 6+Math.random()*6, h: 8+Math.random()*8,
+    cor: cores[Math.floor(Math.random()*cores.length)], vida: 1
+  });
+  if(!confeteRodando){ confeteRodando = true; requestAnimationFrame(animarConfete); }
+}
+function animarConfete(){
+  cx.clearRect(0,0,innerWidth,innerHeight);
+  pecas = pecas.filter(p => p.y < innerHeight+20 && p.vida > 0);
+  for(const p of pecas){
+    p.x += p.vx; p.y += p.vy; p.vy += .35; p.vx *= .98; p.r += p.vr; p.vida -= .004;
+    cx.save(); cx.translate(p.x,p.y); cx.rotate(p.r); cx.globalAlpha = Math.min(1,p.vida*2);
+    cx.fillStyle = p.cor; cx.fillRect(-p.w/2,-p.h/2,p.w,p.h*Math.abs(Math.cos(p.r*2))); cx.restore();
+  }
+  if(pecas.length) requestAnimationFrame(animarConfete); else { confeteRodando = false; cx.clearRect(0,0,innerWidth,innerHeight); }
+}
+</script>
+</body>
+</html>
